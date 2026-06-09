@@ -15,3 +15,6 @@ venv/
 
 # VSCode
 .vscode/
+
+# 個人メモ
+dopp.py
