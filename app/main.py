@@ -26,8 +26,8 @@ app.include_router(master_router)
 @app.get("/mail")
 async def send_test_email(tasks: BackgroundTasks):
     tasks.add_task(
-        NotificationService().send_email,
-        recipients=["ryousuke07230723@gmail.com"],
+        NotificationService(tasks).send_email,
+        recipients=["ryousuke07230723@gmail.com"],  # type: ignore
         subject="Test Mail Coming Through Once",
         body="You shouldn't be interested in every body...",
     )

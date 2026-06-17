@@ -7,7 +7,7 @@ from fastapi import HTTPException
 import jwt
 from app.config import security_settings
 
-APP_DIR = Path(__file__).resolve().parent.parent
+APP_DIR = Path(__file__).resolve().parent
 TEMPLATE_DIR = APP_DIR / "templates"
 
 

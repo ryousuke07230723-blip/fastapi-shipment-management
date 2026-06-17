@@ -151,9 +151,7 @@ class DeliveryPartner(User, table=True):
 
     # 配達員特有の情報を入れるためのカラム2つ
     serviceable_zip_codes: list[int] = Field(
-        sa_column=Column(
-            ARRAY(INTEGER)  # 整数の配列をPostgreSQLのARRAY型で保存
-        ),
+        sa_column=Column(ARRAY(INTEGER)),  # 整数の配列をPostgreSQLのARRAY型で保存
     )
     max_handling_capacity: int
 
