@@ -1,14 +1,16 @@
 # session（DB接続）とmodel（どのテーブルか）を受け取り、全サービスの共通CRUD処理をここに集めた。
 # 子クラスはこれを継承するだけで全操作が使えるようになる。
 
+from typing import Generic, TypeVar
 from uuid import UUID
 
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlmodel import SQLModel
 
+T = TypeVar("T",bound=SQLModel)
 
-class BaseService:
-    def __init__(self, model: type[SQLModel], session: AsyncSession):
+class BaseService(Generic[T]):
+    def __init__(self, model: type[T], session: AsyncSession):
         self.model = model
         self.session = session
 

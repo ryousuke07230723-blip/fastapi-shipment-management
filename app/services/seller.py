@@ -9,7 +9,7 @@ from app.database.models import Seller
 from app.services.user import UserService
 
 
-class SellerService(UserService):
+class SellerService(UserService[Seller]):
     def __init__(self, session: AsyncSession):
         super().__init__(Seller, session)
 

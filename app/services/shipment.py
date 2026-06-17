@@ -14,7 +14,7 @@ from .base import BaseService
 from .delivery_partner import DeliveryPartnerService
 
 
-class ShipmentService(BaseService):
+class ShipmentService(BaseService[Shipment]):
     def __init__(
         self,
         session: AsyncSession,

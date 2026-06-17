@@ -3,7 +3,7 @@ from app.services.base import BaseService
 from app.services.notification import NotificationService
 
 
-class ShipmentEventService(BaseService):
+class ShipmentEventService(BaseService[ShipmentEvent]):
     def __init__(self, session, tasks):
         super().__init__(
             ShipmentEvent,

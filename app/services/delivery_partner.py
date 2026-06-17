@@ -11,7 +11,7 @@ from app.database.models import DeliveryPartner, Shipment
 from .user import UserService
 
 
-class DeliveryPartnerService(UserService):
+class DeliveryPartnerService(UserService[DeliveryPartner]):
     def __init__(self, session):
         super().__init__(DeliveryPartner, session)
 

@@ -1,7 +1,7 @@
 # SellerもDeliveryPartnerも「ユーザーとしてログインできる」共通機能が必要。それをここに集約。
 # メソッドが_始まりなのは「子クラス経由で使う内部メソッド」という慣例。直接インスタンス化しない前提。
 
-from typing import Any
+from typing import Any, Generic, TypeVar
 
 from fastapi import HTTPException, status
 from pwdlib import PasswordHash
@@ -14,10 +14,11 @@ from app.services.utils import generate_access_token
 from .base import BaseService
 
 password_context = PasswordHash.recommended()
+T = TypeVar("T",bound=SQLModel)
 
 
-class UserService(BaseService):
-    def __init__(self, model: type[SQLModel], session: AsyncSession):
+class UserService(BaseService[T],Generic[T]):
+    def __init__(self, model: type[T], session: AsyncSession):
         super().__init__(model, session)
 
     # passwordをhash化してしてDBに保存
