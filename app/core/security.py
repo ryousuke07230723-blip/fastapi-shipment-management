@@ -4,6 +4,7 @@ from typing import Annotated
 from fastapi import Depends, HTTPException
 from fastapi.security import HTTPBearer, OAuth2PasswordBearer
 
+from app.core.exception import ClientNotAuthorized
 from app.services.utils import decode_access_token
 
 # ログインエンドポイントからトークンを取り出すFastAPI組み込みの仕組み
@@ -25,7 +26,7 @@ class AccessTokenBearer(HTTPBearer):
         token_data = decode_access_token(token)  # トークンを解読してpayloadを取得
 
         if token_data is None:
-            raise HTTPException(status_code=401, detail="Not Authorized")
+            raise ClientNotAuthorized
         return token_data
 
 

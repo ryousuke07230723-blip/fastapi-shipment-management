@@ -7,6 +7,7 @@ from fastapi import HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.schemas.shipment import ShipmentCreate, ShipmentUpdate
+from app.core.exception import ClientNotAuthorized, EntityNotFound
 from app.database.models import DeliveryPartner, Seller, Shipment, ShipmentStatus
 from app.services.shipment_event import ShipmentEventService
 
@@ -61,16 +62,10 @@ class ShipmentService(BaseService[Shipment]):
         shipment = await self.get(id)
 
         if shipment is None:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="Shipment not found",
-            )
+            raise EntityNotFound
         # 担当配達員以外は更新できない
         if shipment.delivery_partner_id != partner.id:
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Not authorized",
-            )
+            raise ClientNotAuthorized
 
         update = shipment_update.model_dump(exclude_none=True)  # Noneの項目を除外
         if shipment_update.estimated_delivery:
@@ -85,16 +80,11 @@ class ShipmentService(BaseService[Shipment]):
     async def cancel(self, id: UUID, seller: Seller) -> Shipment:
         shipment = await self.get(id)
         if shipment is None:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="Shipment not found",
-            )
+            raise EntityNotFound
         # 登録したseller本人以外はキャンセルできない
         if shipment.seller_id != seller.id:
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Not Authorized",
-            )
+            raise ClientNotAuthorized
+
         event = await self.event_service.add(
             shipment=shipment,
             status=ShipmentStatus.cancelled,
@@ -106,8 +96,5 @@ class ShipmentService(BaseService[Shipment]):
     async def delete(self, id: UUID) -> None:
         shipment = await self.get(id)
         if shipment is None:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND, detail="Shipment not found"
-            )
-
+            raise EntityNotFound
         return await self._delete(shipment)

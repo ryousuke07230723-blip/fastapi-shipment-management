@@ -8,6 +8,7 @@ from app.api.schemas.dependencies import (
     SellerDep,
     ShipmentServiceDep,
 )
+from app.core.exception import EntityNotFound
 from app.database.models import Shipment
 from app.api.schemas.shipment import ShipmentCreate, ShipmentRead, ShipmentUpdate
 
@@ -19,10 +20,7 @@ router = APIRouter(prefix="/shipment", tags=["Shipment"])
 async def get_shipment(id: UUID, _: SellerDep, service: ShipmentServiceDep):
     shipment = await service.get(id)
     if shipment is None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Given id doesn't exist!",
-        )
+        raise EntityNotFound
     return shipment
 
 
@@ -47,10 +45,7 @@ async def update_shipment(
     update = shipment_update.model_dump(exclude_none=True)
 
     if not update:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="No data provided to update",
-        )
+        raise EntityNotFound
 
     return await service.update(id, shipment_update, partner)
 

@@ -6,6 +6,10 @@ from fastapi import HTTPException, status
 from sqlmodel import any_, select
 
 from app.api.schemas.delivery_partner import DeliveryPartnerCreate
+from app.core.exception import (
+    DeliveryPartnerCapacityExceeded,
+    DeliveryPartnerNotAvailable,
+)
 from app.database.models import DeliveryPartner, Shipment
 
 from .user import UserService
@@ -33,15 +37,15 @@ class DeliveryPartnerService(UserService[DeliveryPartner]):
     async def assign_shipment(self, shipment: Shipment):
         eligible_partners = await self.get_partner_by_zipcode(shipment.destination)
 
+        if not eligible_partners:
+            raise DeliveryPartnerNotAvailable
+
         for partner in eligible_partners:
             if partner.current_handling_capacity > 0:
                 partner.shipments.append(shipment)
                 return partner
 
-        raise HTTPException(
-            status_code=status.HTTP_406_NOT_ACCEPTABLE,
-            detail="No delivery partner available",
-        )
+        raise DeliveryPartnerCapacityExceeded
 
     # 情報更新
     async def update(self, partner: DeliveryPartner):

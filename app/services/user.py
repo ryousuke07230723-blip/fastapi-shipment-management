@@ -3,21 +3,21 @@
 
 from typing import Any, Generic, TypeVar
 
-from fastapi import HTTPException, status
 from pwdlib import PasswordHash
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlmodel import SQLModel
 
+from app.core.exception import BadCredentials
 from app.services.utils import generate_access_token
 
 from .base import BaseService
 
 password_context = PasswordHash.recommended()
-T = TypeVar("T",bound=SQLModel)
+T = TypeVar("T", bound=SQLModel)
 
 
-class UserService(BaseService[T],Generic[T]):
+class UserService(BaseService[T], Generic[T]):
     def __init__(self, model: type[T], session: AsyncSession):
         super().__init__(model, session)
 
@@ -43,10 +43,7 @@ class UserService(BaseService[T],Generic[T]):
             password,
             user.password_hash,
         ):
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="Email or password is incorrect",
-            )
+            raise BadCredentials
 
         return generate_access_token(
             data={

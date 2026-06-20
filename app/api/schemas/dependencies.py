@@ -4,6 +4,7 @@ from uuid import UUID
 
 from fastapi import BackgroundTasks, Depends, HTTPException, status
 
+from app.core.exception import EntityNotFound, InvalidToken
 from app.core.security import oauth2_schema_partner, oauth2_schema_seller
 from app.database.models import DeliveryPartner, Seller
 from app.database.redis import is_jti_blacklisted
@@ -20,11 +21,7 @@ async def _get_access_token(token: str) -> dict:
     data = decode_access_token(token)
 
     if data is None or await is_jti_blacklisted(data["jti"]):
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            # 期限切れもしくは無効なアクセストークン
-            detail="invalid or expired access token",
-        )
+        raise InvalidToken
     return data
 
 
@@ -51,10 +48,7 @@ async def get_current_seller(
     # 例: {"user": {"id": "xxx", ...}, "jti": "...", "exp": ...}
     seller = await session.get(Seller, UUID(token_data["user"]["id"]))
     if seller is None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Not authorized",
-        )
+        raise EntityNotFound
     return seller
 
 
@@ -65,10 +59,7 @@ async def get_current_partner(
 ):
     partner = await session.get(DeliveryPartner, UUID(token_data["user"]["id"]))
     if partner is None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Not authorized",
-        )
+        raise EntityNotFound
     return partner
 
 

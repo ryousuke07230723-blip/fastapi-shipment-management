@@ -9,6 +9,7 @@ from app.database.session import create_db_tables
 
 from app.api.router import master_router
 from app.services.notification import NotificationService
+from app.core.exception import add_exception_handlers
 
 
 @asynccontextmanager
@@ -21,6 +22,7 @@ async def lifespan_handler(app: FastAPI):
 app = FastAPI(lifespan=lifespan_handler)
 
 app.include_router(master_router)
+add_exception_handlers(app)
 
 
 @app.get("/mail")
