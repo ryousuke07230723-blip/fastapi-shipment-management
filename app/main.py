@@ -1,8 +1,9 @@
 # アプリの起動・ルーター登録
 from contextlib import asynccontextmanager
+from time import perf_counter
 
 
-from fastapi import BackgroundTasks, FastAPI
+from fastapi import BackgroundTasks, FastAPI, Request, Response
 from scalar_fastapi import get_scalar_api_reference
 
 from app.database.session import create_db_tables
@@ -23,6 +24,18 @@ app = FastAPI(lifespan=lifespan_handler)
 
 app.include_router(master_router)
 add_exception_handlers(app)
+
+
+@app.middleware("http")
+async def custom_middleware(request: Request, call_next):
+    start = perf_counter()
+
+    response: Response = await call_next(request)
+
+    end = perf_counter()
+    time_taken = round(end - start, 2)
+
+    return response
 
 
 @app.get("/mail")
